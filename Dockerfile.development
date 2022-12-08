@@ -1,0 +1,30 @@
+FROM ruby:3.1.3-slim
+
+RUN apt-get update -yq && apt-get upgrade -yq && apt-get install -y -qq --no-install-recommends \
+  build-essential gnupg2 git vim libpq-dev
+
+# Clean cache and temp files, fix permissions
+RUN apt-get clean -qy \
+  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+RUN mkdir /app
+WORKDIR /app
+
+RUN gem install bundler
+
+ENV LANG=C.UTF-8 \
+  BUNDLE_GEMFILE=/app/Gemfile \
+  BUNDLE_JOBS=20 \
+  BUNDLE_RETRY=3 \
+  BUNDLE_PATH=/bundle \
+  BUNDLE_BIN=/bundle/bin \
+  BUNDLE_GITHUB__COM="${GITHUB_TOKEN}:x-oauth-basic" \
+  GEM_HOME=/bundle
+  
+ENV PATH="${BUNDLE_BIN}:${PATH}"
+
+COPY Gemfile Gemfile.lock ./
+RUN gem install bundler -v 2.3.12
+
+EXPOSE 3000
+CMD ["bundle", "exec", "rails", "s", "-b", "0.0.0.0"]
