@@ -3,8 +3,8 @@ module TwilioClient
 
   def instance
     Twilio::REST::Client.new(
-      Rails.application.credentials.twilio_account_sid,
-      Rails.application.credentials.twilio_auth_token
+      ENV["TWILIO_ACCOUNT_SID"],
+      ENV["TWILIO_AUTH_TOKEN"]
     )
   end
 end

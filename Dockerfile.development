@@ -1,7 +1,12 @@
-FROM ruby:3.1.3-slim
+FROM ruby:3.0.1-slim
 
 RUN apt-get update -yq && apt-get upgrade -yq && apt-get install -y -qq --no-install-recommends \
-  build-essential gnupg2 git vim libpq-dev
+  build-essential gnupg2 git vim libpq-dev curl nodejs
+
+RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+RUN apt-get update
+RuN apt-get install yarn -y
 
 # Clean cache and temp files, fix permissions
 RUN apt-get clean -qy \
@@ -25,6 +30,7 @@ ENV PATH="${BUNDLE_BIN}:${PATH}"
 
 COPY Gemfile Gemfile.lock ./
 RUN bundle install
+RUN yarn install --check-files
 
 EXPOSE 3000
 CMD ["bundle", "exec", "rails", "s", "-b", "0.0.0.0"]
